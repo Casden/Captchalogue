@@ -4,4 +4,4 @@ compatibility_date = "2026-05-05"
 
 [vars]
 # Set in Cloudflare dashboard or via wrangler secret:
-# ALLOWED_ORIGIN = "https://<your-github-username>.github.io"
+ALLOWED_ORIGIN = "https://Casden.github.io"
