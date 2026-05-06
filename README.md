@@ -1,44 +1,66 @@
-# Captchalogue — Hardhat + Sepolia
+# Captchalogue
 
-Smart contract setup with a separate frontend app in `frontend/`.
+Captchalogue is an NFT-powered artifact registry for representing physical items as digital assets on Ethereum.  
+This repository includes the smart contract, deployment tooling, tests, and a frontend DApp for wallet-based interaction.
 
-## What You Need Locally
+## Features
 
-1. **Node.js LTS** (includes `npm`).  
-   - Download: https://nodejs.org/en  
-   - In PowerShell, confirm: `node -v` and `npm -v`
+- Mint artifact NFTs with custom metadata URIs.
+- Store verification-oriented artifact fields on-chain.
+- Support private/public artifact visibility behavior at the contract level.
+- Deploy to Sepolia using Hardhat.
+- Interact from a React + Vite frontend with MetaMask.
+- Publish the frontend to GitHub Pages.
 
-2. **A Sepolia RPC URL** (free tier is fine): Infura, Alchemy, QuickNode, or similar.
+## Tech Stack
 
-3. **A Sepolia wallet private key** for deployment only — use an account funded with **Sepolia ETH** only (never your mainnet key).
+- Solidity `^0.8.20`
+- Hardhat
+- Ethers.js
+- React + Vite
+- GitHub Actions (optional Pages deploy)
 
-4. **(Optional)** Etherscan API key for contract verification: https://etherscan.io/apis
+## Repository Structure
 
----
+| Path | Purpose |
+|------|---------|
+| `contracts/CaptchalogueArtifact.sol` | Core NFT artifact contract |
+| `scripts/deployCaptchalogue.js` | Deployment script |
+| `test/CaptchalogueArtifact.js` | Contract tests |
+| `frontend/` | React frontend DApp |
+| `hardhat.config.js` | Hardhat network and compiler configuration |
+| `.env.example` | Backend/deployment environment template |
 
-## Setup (machine steps)
+## Prerequisites
 
-Open a terminal in this folder (`Captchalogue`), then:
+- Node.js LTS and npm
+- A Sepolia RPC URL (Infura, Alchemy, QuickNode, etc.)
+- A Sepolia wallet private key for deployment
+- (Optional) Etherscan API key for source verification
+
+## Smart Contract Setup
+
+From the repository root:
 
 ```powershell
 npm install
-```
-
-Copy environment template and edit:
-
-```powershell
 copy .env.example .env
-# Edit .env: set SEPOLIA_RPC_URL, SEPOLIA_PRIVATE_KEY (and optionally ETHERSCAN_API_KEY)
 ```
 
-Compile and run tests:
+Update `.env`:
+
+```env
+SEPOLIA_RPC_URL=...
+SEPOLIA_PRIVATE_KEY=...
+ETHERSCAN_API_KEY=...
+```
+
+Compile and test:
 
 ```powershell
 npm run compile
 npm test
 ```
-
----
 
 ## Deploy to Sepolia
 
@@ -46,38 +68,57 @@ npm test
 npm run deploy:sepolia
 ```
 
-The script prints the deployed contract address; keep it for the course submission and future frontend ABI wiring.
+The deploy script prints the contract address. Save it for frontend configuration.
 
-Gas is paid from the Sepolia ETH balance on the wallet matching `SEPOLIA_PRIVATE_KEY`. Use a faucet such as Metana Sepolia faucet (see your course handout) if needed.
-
----
-
-## Verify on Etherscan (optional)
-
-After deploy, with `ETHERSCAN_API_KEY` in `.env`:
+## Verify Contract (Optional)
 
 ```powershell
 npx hardhat verify --network sepolia <DEPLOYED_CONTRACT_ADDRESS>
 ```
 
-This contract has no constructor arguments.
+The current contract has no constructor arguments.
 
----
+## Frontend Setup
 
-## Project layout
+From `frontend/`:
 
-| Path | Purpose |
-|------|---------|
-| `contracts/CaptchalogueArtifact.sol` | NFT artifact contract |
-| `scripts/deployCaptchalogue.js` | Sepolia/network deploy script |
-| `test/CaptchalogueArtifact.js` | Hardhat tests |
-| `frontend/` | React/Vite MetaMask UI and GitHub Pages deploy config |
-| `hardhat.config.js` | Solidity 0.8.20, Sepolia network, Etherscan |
-| `.env.example` | Template for RPC URL and keys |
+```powershell
+npm install
+copy .env.example .env
+```
 
----
+Set the deployed contract address:
 
-## Notes
+```env
+VITE_CONTRACT_ADDRESS=0xYourDeployedContractAddress
+```
 
-- **Do not commit** `.env`; it is listed in `.gitignore`.
-- If you previously compiled in Remix inside this folder, you can delete any stray Remix `artifacts` output; Hardhat will regenerate `artifacts/` and `cache/` on `compile`.
+Run locally:
+
+```powershell
+npm run dev
+```
+
+Build for production:
+
+```powershell
+npm run build
+```
+
+## GitHub Pages
+
+The frontend is configured for GitHub Pages compatibility.
+
+- Manual deploy from `frontend/`:
+
+```powershell
+npm run deploy
+```
+
+- Or use the workflow at `.github/workflows/frontend-gh-pages.yml` and set repository secret `VITE_CONTRACT_ADDRESS`.
+
+## Security Notes
+
+- Never commit `.env` files or private keys.
+- Use a dedicated test wallet for Sepolia deployments.
+- Assume any committed secret is compromised and rotate it immediately.

@@ -1,56 +1,81 @@
 # Captchalogue Frontend
 
-React + Vite frontend for interacting with `CaptchalogueArtifact` on Sepolia.
+Web client for interacting with the `CaptchalogueArtifact` smart contract on Sepolia.
 
-## Local setup you must run
+## Features
 
-From this folder:
+- Connect wallet via MetaMask
+- Detect and switch to Sepolia
+- Mint artifact NFTs (`createArtifact`)
+- Read public artifact data by token ID
+- Build and deploy to GitHub Pages
+
+## Stack
+
+- React
+- Vite
+- Ethers.js
+
+## Prerequisites
+
+- Node.js LTS and npm
+- A deployed `CaptchalogueArtifact` contract address on Sepolia
+- MetaMask installed in your browser
+
+## Quick Start
+
+From `frontend/`:
 
 ```powershell
 npm install
 copy .env.example .env
 ```
 
-Then edit `.env` and set:
+Set your deployed contract address in `.env`:
 
 ```env
 VITE_CONTRACT_ADDRESS=0xYourDeployedContractAddress
 ```
 
-Run locally:
+Run in development mode:
 
 ```powershell
 npm run dev
 ```
 
-## Build
+## Production Build
 
 ```powershell
 npm run build
 npm run preview
 ```
 
-## GitHub Pages deployment
+## Deploy to GitHub Pages
 
-This app is configured with Vite `base: "./"` for project-page compatibility.
+This app uses Vite `base: "./"` for GitHub Pages project-site compatibility.
 
-### Option A (manual deploy from local)
+### Manual deployment
 
 ```powershell
 npm run deploy
 ```
 
-This publishes `dist/` to a `gh-pages` branch (using the `gh-pages` package).
+This publishes `dist/` to the `gh-pages` branch.
 
-### Option B (automatic deploy with GitHub Actions)
+### GitHub Actions deployment
 
-Use the workflow at `.github/workflows/frontend-gh-pages.yml`.
-After pushing to `main`, enable Pages in repo settings:
+Workflow file: `.github/workflows/frontend-gh-pages.yml`
 
-- Settings -> Pages
-- Source: GitHub Actions
+1. Add repository secret `VITE_CONTRACT_ADDRESS`
+2. Enable GitHub Pages with **Source = GitHub Actions**
+3. Push to `main`
 
-## Required network
+## Network Requirements
 
-- MetaMask must be connected to Sepolia (`11155111`).
-- The app includes a "Switch to Sepolia" button.
+- Wallet must be connected to Sepolia (`chainId: 11155111`)
+- Write transactions are blocked when on a different network
+
+## Security
+
+- Do not commit `.env` files.
+- Do not expose private keys in frontend code or environment variables.
