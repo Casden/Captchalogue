@@ -17,7 +17,7 @@ function formatTimestamp(unixSeconds) {
 
 function shortenHash(hash) {
   if (!hash || hash === ZERO_HASH) return "";
-  return `${hash.slice(0, 10)}…${hash.slice(-6)}`;
+  return `${hash.slice(0, 10)}?${hash.slice(-6)}`;
 }
 
 function evidenceCommitment(uri) {
@@ -262,14 +262,15 @@ export default function MyArtifactsPage() {
 
   async function refreshArtifacts() {
     if (!account || !provider || !hasContractAddress()) return;
-    const c = getReadonlyContract(provider);
-    const ids = await c.tokensOfOwner(account);
+    const readContract = getReadonlyContract(provider);
+    const ownerContract = await getWritableContract(getSigner);
+    const ids = await readContract.tokensOfOwner(account);
     const normalized = ids.map((x) => Number(x));
     setTokenIds(normalized);
 
     const entries = await Promise.all(
       normalized.map(async (id) => {
-        const priv = await c.getPrivateArtifact(id);
+        const priv = await ownerContract.getPrivateArtifact(id);
         return [
           id,
           {
@@ -312,7 +313,7 @@ export default function MyArtifactsPage() {
     return () => {
       cancelled = true;
     };
-  }, [account, provider, toast]);
+  }, [account, provider, toast, getSigner]);
 
   async function withWrite(action) {
     if (!isConnected || !isCorrectNetwork || !hasContractAddress()) {
@@ -394,7 +395,7 @@ export default function MyArtifactsPage() {
       <section className="card">
         <div className="my-artifacts-header-row">
           <div className="my-artifacts-count">
-            <strong>{loading ? "Loading…" : `${tokenIds.length}`}</strong> artifacts
+            <strong>{loading ? "Loading?" : `${tokenIds.length}`}</strong> artifacts
           </div>
           <div className="row">
             <button type="button" className="btn btn-secondary" onClick={() => navigate("/app/mint")}>

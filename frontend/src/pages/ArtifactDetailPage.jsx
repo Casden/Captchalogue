@@ -3,13 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { ethers } from "ethers";
 import { useWallet } from "../wallet/WalletContext";
 import { useToast } from "../components/StatusBanner";
-import {
-  explorerTxUrl,
-  explorerTokenUrl,
-  getReadonlyContract,
-  getWritableContract,
-  hasContractAddress,
-} from "../lib/contract";
+import { explorerTxUrl, explorerTokenUrl, getWritableContract, hasContractAddress } from "../lib/contract";
 import { ipfsUriToGateway } from "../lib/ipfs";
 
 const ZERO_HASH = "0x0000000000000000000000000000000000000000000000000000000000000000";
@@ -89,7 +83,7 @@ export default function ArtifactDetailPage() {
     if (!numericTokenId || Number.isNaN(numericTokenId) || numericTokenId < 1) return;
     setLoading(true);
     try {
-      const c = getReadonlyContract(provider);
+      const c = await getWritableContract(getSigner);
       const priv = await c.getPrivateArtifact(numericTokenId);
       const owner = await c.ownerOf(numericTokenId);
 
@@ -126,7 +120,7 @@ export default function ArtifactDetailPage() {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [provider, numericTokenId]);
+  }, [provider, numericTokenId, getSigner]);
 
   const canWrite = isConnected && isCorrectNetwork && hasContractAddress();
   const isOwner = data?.owner && account && data.owner.toLowerCase() === account.toLowerCase();
