@@ -1,32 +1,30 @@
-import { createHelia } from "helia";
-import { unixfs } from "@helia/unixfs";
-
-let heliaPromise = null;
-let fsPromise = null;
-
-async function getHelia() {
-  if (!heliaPromise) {
-    heliaPromise = createHelia();
-  }
-  return heliaPromise;
-}
-
-async function getFs() {
-  if (!fsPromise) {
-    fsPromise = (async () => {
-      const helia = await getHelia();
-      return unixfs(helia);
-    })();
-  }
-  return fsPromise;
-}
+const UPLOAD_API_URL = import.meta.env.VITE_UPLOAD_API_URL || "";
 
 export async function uploadFile(file) {
   if (!file) throw new Error("No file selected.");
-  const fs = await getFs();
-  const buffer = new Uint8Array(await file.arrayBuffer());
-  const cid = await fs.addBytes(buffer);
-  const cidString = cid.toString();
+  if (!UPLOAD_API_URL) {
+    throw new Error("Missing VITE_UPLOAD_API_URL. Configure your Cloudflare upload endpoint.");
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(UPLOAD_API_URL, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(`Pinata upload failed (${response.status}): ${message}`);
+  }
+
+  const json = await response.json();
+  const cidString = json.cid || json.IpfsHash;
+  if (!cidString) {
+    throw new Error("Pinata response missing IpfsHash.");
+  }
+
   return {
     cid: cidString,
     uri: `ipfs://${cidString}`,

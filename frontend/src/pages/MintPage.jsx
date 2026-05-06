@@ -83,8 +83,8 @@ export default function MintPage() {
             )}
           </div>
           <p className="hint">
-            Tip: Helia stores files in this browser tab. Keep it open during your demo so the image stays
-            reachable, or pin the CID with another IPFS service.
+            Images are uploaded through your configured Cloudflare endpoint and pinned to IPFS, so metadata
+            remains available after leaving the tab.
           </p>
         </section>
 

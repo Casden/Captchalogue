@@ -5,7 +5,7 @@ Web client for interacting with the `CaptchalogueArtifact` smart contract on Sep
 ## Features
 
 - Wallet-gated dashboard layout with sidebar navigation.
-- Drag-and-drop artwork upload backed by an in-browser IPFS node (Helia).
+- Drag-and-drop artwork upload with persistent IPFS pinning through a Cloudflare Worker + Pinata.
 - Mint, Explore, Verify, and Privacy pages mapped to every public contract function.
 - Toast-style status messages and a Sepolia network indicator.
 - Hash routing for friction-free GitHub Pages hosting.
@@ -15,7 +15,8 @@ Web client for interacting with the `CaptchalogueArtifact` smart contract on Sep
 - React + Vite
 - React Router (HashRouter)
 - Ethers.js v6
-- Helia + UnixFS (browser-only IPFS)
+- Cloudflare Workers (upload proxy)
+- Pinata HTTP API (server-side pinning)
 
 ## Pages
 
@@ -46,6 +47,12 @@ Set your deployed contract address in `.env`:
 
 ```env
 VITE_CONTRACT_ADDRESS=0xYourDeployedContractAddress
+```
+
+Set your Cloudflare Worker upload URL in `.env`:
+
+```env
+VITE_UPLOAD_API_URL=https://your-worker-name.your-subdomain.workers.dev/upload
 ```
 
 Run in development mode:
@@ -86,11 +93,12 @@ Workflow file: `.github/workflows/frontend-gh-pages.yml`
 - Wallet must be connected to Sepolia (`chainId: 11155111`).
 - Write transactions are blocked when on a different network; the topbar exposes a one-click switch.
 
-## IPFS Notes (Helia)
+## IPFS Notes (Pinned Uploads)
 
-- Image uploads run entirely in the browser. No third-party API keys, no secrets in the bundle.
-- The browser tab is the originating IPFS peer for any file you upload. **Keep the tab open during your demo** so the metadata image stays reachable through public gateways.
-- The minted token URI is always a valid `ipfs://<cid>`, regardless of pinning. To make content reliably available beyond your tab, pin the CID with an external IPFS service.
+- Image uploads are sent to your Cloudflare Worker, which pins to Pinata using a server-side JWT.
+- End users do not need a Pinata key; they only need MetaMask + Sepolia ETH.
+- The minted token URI is `ipfs://<cid>` and remains valid for NFT metadata.
+- Keep `PINATA_JWT` only in Cloudflare Worker secrets, never in frontend code.
 
 ## Security
 

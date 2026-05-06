@@ -38,13 +38,13 @@ export default function ImageDropzone({ onUploaded, onError, disabled }) {
     setFilename(file.name);
     setResult(null);
     setStatus("uploading");
-    setProgressText("Uploading to in-browser IPFS...");
+    setProgressText("Uploading and pinning to IPFS...");
 
     try {
       const uploaded = await uploadFile(file);
       setResult(uploaded);
       setStatus("uploaded");
-      setProgressText("Stored locally with CID. Keep this tab open during your demo.");
+      setProgressText("Pinned successfully. This CID should remain available after you leave the tab.");
       if (onUploaded) onUploaded(uploaded);
     } catch (err) {
       reportError(err?.message || "IPFS upload failed.");
