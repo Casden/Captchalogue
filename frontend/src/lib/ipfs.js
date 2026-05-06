@@ -16,7 +16,11 @@ export async function uploadFile(file) {
 
   if (!response.ok) {
     const message = await response.text();
-    throw new Error(`Pinata upload failed (${response.status}): ${message}`);
+    const hint =
+      response.status === 405 && /<\s*html/i.test(message)
+        ? " This often means VITE_UPLOAD_API_URL points at a static site (e.g. GitHub Pages) instead of your Cloudflare Worker URL ending with /upload."
+        : "";
+    throw new Error(`Upload failed (${response.status}): ${message}${hint}`);
   }
 
   const json = await response.json();
