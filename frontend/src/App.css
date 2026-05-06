@@ -1,0 +1,102 @@
+:root {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  color: #111;
+  background: #f7f7fb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.app {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.subtitle {
+  color: #444;
+}
+
+.card {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+form {
+  display: grid;
+  gap: 0.8rem;
+}
+
+label {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 0.6rem 0.7rem;
+}
+
+button {
+  width: fit-content;
+  border: 1px solid #333;
+  background: #222;
+  color: white;
+  border-radius: 8px;
+  padding: 0.55rem 0.85rem;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.row {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox input {
+  width: 16px;
+  height: 16px;
+}
+
+.result {
+  margin-top: 1rem;
+  border-top: 1px solid #eee;
+  padding-top: 0.7rem;
+}
+
+.warning {
+  color: #8a5200;
+}
+
+.status {
+  border: 1px dashed #bbb;
+  border-radius: 8px;
+  padding: 0.7rem;
+  background: #fff;
+}

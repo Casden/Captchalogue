@@ -1,0 +1,14 @@
+node_modules/
+.cache/
+artifacts/
+cache/
+coverage/
+coverage.json
+
+.env
+.env.local
+*.log
+
+.states/
+
+frontend/dist/

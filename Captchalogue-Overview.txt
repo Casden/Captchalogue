@@ -1,0 +1,18 @@
+CAPTCHALOGUE
+A project by Camden Moore
+
+
+Overview:
+
+     Captchalogue is a smart contract, blockchain based NFT project that allows you to digitize any physical object or document, storing it on the blockchain in perpetuity. Created items are known as "artifacts", and can be made public or private, as well as verification systems put in place to both prove it is a real item, and currently exists in the NFT owner(s) possession.
+
+Challenges:
+
+     With any item being sold online, it can be hard to verify whether the listing is real or made with stolen photos online in order to scam unsuspecting customers. Captchalogue aims to solve this problem by allowing items to be minted onto the blockchain, tying them to a permanent NFT that can be verified and transferred to anyone to prove authenticity and ownership.
+Captchalogue can also be used to mint NFTs for documents such as home deeds and automobile titles, with strict privacy measures that keep the token on the blockchain, but any details about it will be hidden to only the owner and anyone they may allow access to.
+
+Current State Solutions:
+
+     Currently, middleman services and careers like realtors serve as stopgaps that allow for verification
+
+and safety of online sales of items of large and small value. Captchalogue simplifies this process by requiring verification as minimally as possible, and once an item is converted to an artifact they are permanently tied together. In short, Captchalogue saves time, money, and hassle and seeks to improve the safety of online consumers with anything they want to purchase or sell.

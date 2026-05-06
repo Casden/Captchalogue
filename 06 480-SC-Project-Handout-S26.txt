@@ -1,0 +1,140 @@
+CS 480 - SC Project Handout - Spring 2026
+
+Overview
+
+This SC project is designed for students enrolled in the "CS 480 - Advanced Topics in Computing: Blockchain and Smart Contracts" course, aiming to deepen their understanding of blockchain technology and its practical applications, particularly through Ethereum smart contracts and decentralized application (DApp). The project is divided into two main parts, allowing students to conceptualize, design, and deploy a decentralized application (DApp) that addresses a real-world challenge using Ethereum smart
+contracts.
+
+Important: The main goal of this project is smart contract development, testing, Sepolia deployment, and frontend-to-contract interaction. The frontend does not need to be publicly hosted. Running the frontend locally is sufficient, as long as it can connect to MetaMask and successfully read from and write to the smart contract deployed on Sepolia.
+
+Part 1: Project Overview Document
+
+Due Date: Soft due date on April 22nd at 11:59 PM. This means you are strongly encouraged to complete your Project Overview Document by this date so you have a clear project plan early. However, this is a soft due date, not a final locked deadline. You may continue revising and improving your Project
+Overview Document between now and the final project submission. The final revised version of the Project Overview Document should be included again as part of your final project delivery.
+
+Included in your Project Overview Document:
+
+- Project Overview
+
+-- Identify a Challenge or Problem: Choose a challenge or a problem within a selected industry. Provide a analysis of the problem, explaining why it is currently a challenge or a problem.
+
+-- Current State Solutions: Discuss existing solutions to the identified problem. Evaluate these solutions and argue why a blockchain-based approach could be superior, and how a smart contract DApp could offer a better alternative solution.
+
+Part 2: DApp Development and Presentation
+
+Final Submission Due Date: May 6th (11:59 PM). The complete project, including all documentation and deliverables, must be submitted.
+
+DApp Development
+
+The core of this assignment is smart contract development, testnet deployment, and frontend interaction with an on-chain smart contract. For this project, the required workflow is:
+
+Hardhat + Sepolia Ethereum test network + functional user interface
+Your DApp should address the challenge identified in Part 1. For this project, you are required to:
+* use Hardhat for smart contract development, testing, and deployment;
+
+* deploy your smart contract to the Sepolia Ethereum test network;
+* include some testing code for your smart contract;
+* build a functional frontend UI that can interact with your deployed contract through MetaMask.
+
+Important Clarification About the Frontend Requirement
+
+The frontend for this project does not need to be deployed to a public hosting platform, and you do not
+need to purchase or bind a domain name.
+The reason is that hosting a frontend online would introduce a substantial amount of extra work related to web deployment, domain configuration, hosting services, and platform setup. Those tasks are outside the main focus of this assignment.
+
+Instead, the focus of this project is:
+* writing the smart contract,
+* testing the smart contract a little,
+* deploying the smart contract to Sepolia,
+* and successfully interacting with that deployed contract from a locally running frontend.
+
+Therefore, it is completely acceptable and actually expected for your frontend to run only on localhost on your own computer. As long as your frontend can connect to MetaMask and successfully perform read
+and write interactions with the smart contract deployed on Sepolia, the frontend requirement is satisfied.
+
+Because this project uses the Sepolia test network and test ETH, the required project workflow can be completed without spending real money.
+
+Minimum Functional UI Requirements
+
+To make the UI requirement more concrete, a submission will be considered to have a functional UI only if it can do all of the following at minimum:
+1. Connect to MetaMask
+2. Detect and use the correct Sepolia network
+3. Read at least one on-chain state value from the deployed smart contract
+4. Successfully send at least one write transaction to the deployed smart contract through MetaMask
+
+For example, in the SC Project Running Demo I provided, it include read/write interaction:
+* reading the current counter value and then incrementing it;
+* reading stored data and then updating that data;
+* displaying a status value and then submitting a transaction that changes it.
+
+Again, the UI does not need to be visually complex or professionally hosted. The main goal is to demonstrate correct end-to-end interaction between the frontend, MetaMask, and the smart contract deployed on Sepolia.
+
+Testing Requirement
+
+Because blockchain deployments are effectively immutable, careful testing is an essential part of this
+assignment. Before deployment, you should test your smart contract using Hardhat. Your submission must include some test code that demonstrates the correctness of the core contract functionality.
+
+Running Demo Reference
+
+I have provided a very simple running smart contract project demo for reference. In the current demo:
+* the smart contract is deployed to the Sepolia testnet;
+* the frontend is not deployed to a public platform and is instead opened locally on localhost;
+* after MetaMask is switched to the Sepolia network, the frontend can successfully connect to the wallet;
+* the frontend can read the current contract state from Sepolia;
+* the frontend can also send a write transaction to the deployed contract.
+In the demo test, the frontend first read the current contract value as count = 5. After clicking +1,
+confirming the transaction in MetaMask, and refreshing the page, the value became count = 6. This shows that the full interaction loop was completed successfully: local frontend ? MetaMask ? Sepolia smart contract ? updated on-chain state.
+
+How Students Should Use the Demo as a Model
+
+Please do not copy the same project idea as the demo. However, your project could follow the same overall development pattern:
+1. develop and test your smart contract locally with Hardhat;
+2. deploy the smart contract to Sepolia;
+3. connect your frontend to the deployed Sepolia contract using the correct contract address and ABI;
+4. run the frontend locally;
+5. use MetaMask on Sepolia to perform at least one successful read and one successful write interaction.
+
+In other words, the demo is meant to show you what a successful minimum project completion looks like. Your own project should have a different application idea.
+
+Sepolia Faucet Note
+
+As discussed in the previous Hardhat tutorial handout, you may use the Metana Sepolia Faucet at https://faucet.metana.io/. This faucet requires signing in with a Google account. Based on Metana's
+current faucet information, it provides about 0.06 Sepolia ETH per day and does not require a mainnet ETH balance.
+
+Submission Requirements
+
+Your final submission should include all of the following:
+1. Your Project Overview Document
+2. Smart contract source code
+3. Frontend source code
+4. Hardhat test code
+5. A simple README file that clearly explains:
+o how to install dependencies,
+o how to run the project locally,
+o how to run the tests,
+o how to start the frontend,
+o and how to connect the frontend to the deployed Sepolia contract
+6. Your deployed Sepolia contract address
+7. Screenshots showing:
+o your frontend running locally,
+
+o MetaMask connected to the Sepolia network,
+o at least one successful read from the deployed contract,
+o and at least one successful write transaction
+8. Any additional files needed for the instructor to reproduce or evaluate your project
+
+Presentation
+Presentation Date: May 6th during lecture time. Prepare a one-page PowerPoint slide that explains:
+* the problem you selected,
+* your DApp solution,
+* and its potential impact.
+
+During your presentation, you must also provide a live demo of your working DApp. At minimum, your demo should show:
+* MetaMask connection,
+* successful reading of on-chain data,
+* and one successful write transaction to the deployed Sepolia contract.
+
+In addition, during the live demo, students are expected to briefly show successful execution of their test suite (e.g., Hardhat test results in the terminal) to demonstrate that the smart contract functionality was tested before deployment.
+
+Each student will have a maximum of 4 minutes for the presentation and demo.
+
+Important: The live presentation and demo are a required part of this project assignment. If you do not complete the live presentation, your SC project grade may be heavily reduced.
