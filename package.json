@@ -6,11 +6,14 @@
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
-    "deploy:sepolia": "hardhat run scripts/deployCaptchalogue.js --network sepolia"
+    "deploy:sepolia": "hardhat run scripts/deployCaptchalogue.js --network sepolia",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "dotenv": "^16.4.5",
-    "hardhat": "^2.22.0"
+    "hardhat": "^2.22.0",
+    "wrangler": "^4.88.0"
   }
 }
