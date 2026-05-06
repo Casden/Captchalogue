@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 
 const SEPOLIA_CHAIN_ID = 11155111;
 const SEPOLIA_CHAIN_HEX = "0xaa36a7";
+const DISCONNECT_FLAG_KEY = "captchalogue.walletDisconnected";
 
 const WalletContext = createContext(null);
 
@@ -19,6 +20,10 @@ export function WalletProvider({ children }) {
   const [account, setAccount] = useState("");
   const [chainId, setChainId] = useState(null);
   const [error, setError] = useState("");
+  const [allowAutoConnect, setAllowAutoConnect] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return window.localStorage.getItem(DISCONNECT_FLAG_KEY) !== "1";
+  });
 
   const isMetaMaskInstalled =
     typeof window !== "undefined" && typeof window.ethereum !== "undefined";
@@ -33,18 +38,28 @@ export function WalletProvider({ children }) {
     try {
       const net = await provider.getNetwork();
       setChainId(Number(net.chainId));
-      const accounts = await provider.send("eth_accounts", []);
-      setAccount(accounts[0] || "");
+      if (allowAutoConnect) {
+        const accounts = await provider.send("eth_accounts", []);
+        setAccount(accounts[0] || "");
+      } else {
+        setAccount("");
+      }
     } catch (err) {
       setError(parseError(err));
     }
-  }, [provider]);
+  }, [provider, allowAutoConnect]);
 
   useEffect(() => {
     if (!isMetaMaskInstalled) return undefined;
     refresh();
 
-    const handleAccountsChanged = (accounts) => setAccount(accounts[0] || "");
+    const handleAccountsChanged = (accounts) => {
+      if (!allowAutoConnect) {
+        setAccount("");
+        return;
+      }
+      setAccount(accounts[0] || "");
+    };
     const handleChainChanged = () => window.location.reload();
 
     window.ethereum.on("accountsChanged", handleAccountsChanged);
@@ -54,12 +69,16 @@ export function WalletProvider({ children }) {
       window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
       window.ethereum.removeListener("chainChanged", handleChainChanged);
     };
-  }, [isMetaMaskInstalled, refresh]);
+  }, [isMetaMaskInstalled, refresh, allowAutoConnect]);
 
   const connect = useCallback(async () => {
     setError("");
     try {
       if (!provider) throw new Error("MetaMask is not installed.");
+      setAllowAutoConnect(true);
+      if (typeof window !== "undefined") {
+        window.localStorage.removeItem(DISCONNECT_FLAG_KEY);
+      }
       const accounts = await provider.send("eth_requestAccounts", []);
       setAccount(accounts[0] || "");
       const net = await provider.getNetwork();
@@ -83,6 +102,10 @@ export function WalletProvider({ children }) {
   }, [refresh]);
 
   const disconnect = useCallback(() => {
+    setAllowAutoConnect(false);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(DISCONNECT_FLAG_KEY, "1");
+    }
     setAccount("");
   }, []);
 
