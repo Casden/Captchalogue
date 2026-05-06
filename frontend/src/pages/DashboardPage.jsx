@@ -86,17 +86,17 @@ export default function DashboardPage() {
             <strong>Mint</strong>
             <span>Create a new artifact NFT with an image upload.</span>
           </Link>
+          <Link to="/app/artifacts" className="quick-action">
+            <strong>My Artifacts</strong>
+            <span>Browse, edit, hide, and submit evidence for tokens you own.</span>
+          </Link>
           <Link to="/app/explore" className="quick-action">
             <strong>Explore</strong>
             <span>Look up any artifact by token ID.</span>
           </Link>
-          <Link to="/app/verify" className="quick-action">
-            <strong>Verify</strong>
-            <span>Submit existence and possession attestations.</span>
-          </Link>
-          <Link to="/app/privacy" className="quick-action">
-            <strong>Privacy</strong>
-            <span>Toggle privacy on artifacts you own.</span>
+          <Link to="/app/about" className="quick-action">
+            <strong>About</strong>
+            <span>How Captchalogue's verification and privacy work.</span>
           </Link>
         </div>
       </section>

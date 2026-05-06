@@ -7,9 +7,8 @@ import ThemeToggle from "../components/ThemeToggle";
 const NAV_ITEMS = [
   { to: "/app", label: "Dashboard", end: true },
   { to: "/app/mint", label: "Mint" },
+  { to: "/app/artifacts", label: "My Artifacts" },
   { to: "/app/explore", label: "Explore" },
-  { to: "/app/verify", label: "Verify" },
-  { to: "/app/privacy", label: "Privacy" },
   { to: "/app/about", label: "About" },
 ];
 

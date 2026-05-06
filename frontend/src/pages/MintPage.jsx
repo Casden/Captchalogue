@@ -222,7 +222,7 @@ export default function MintPage() {
                 onChange={(e) => setIsPrivate(e.target.checked)}
                 disabled={isMinting}
               />
-              Mark as private (hides name and URI from public reads)
+              Hide from default view (name + URI still readable on-chain)
             </label>
 
             <div className="readonly-field">

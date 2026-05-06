@@ -6,8 +6,8 @@ export default function AboutPage() {
       <header className="page-header">
         <h1>About Captchalogue</h1>
         <p className="page-sub">
-          Captchalogue is an NFT-powered artifact registry that represents physical items as
-          on-chain digital records, with a two-part verification model and hybrid privacy.
+          Captchalogue is an NFT-powered artifact registry that represents physical items as on-chain
+          digital records, with a hybrid verification model and an explicitly soft privacy toggle.
         </p>
       </header>
 
@@ -15,16 +15,19 @@ export default function AboutPage() {
         <h2>How it works</h2>
         <ul className="content-list">
           <li>
-            <strong>Mint</strong>: drop an image, give it a name, and the app stores the file via
-            in-browser IPFS (Helia), then mints an ERC-721-compatible artifact NFT on Sepolia.
+            <strong>Mint</strong>: drop an image, give it a name, and the app pins the file to IPFS
+            through a Cloudflare Worker + Pinata, then mints an ERC-721 artifact on Sepolia.
           </li>
           <li>
-            <strong>Verify</strong>: each artifact carries an existence score (0-50) and a
-            possession score (0-50) that the owner can submit with evidence.
+            <strong>Verify</strong>: the owner submits an evidence URL or IPFS CID for "existence" and
+            "possession". The frontend hashes it with keccak256 and the contract stores only the
+            commitment + timestamp; the original URL is captured in the event log. Transferring the
+            artifact resets both commitments.
           </li>
           <li>
-            <strong>Privacy</strong>: artifacts can be public or private. Private tokens hide their
-            name and metadata URI from public reads while keeping ownership and scores visible.
+            <strong>Hide from default view</strong>: artifacts can be flagged as hidden, which redacts
+            the convenience read for outside callers. This is a UI-level hint, not encryption: storage
+            slots, calldata history, and tokenURI still expose the metadata URI on-chain.
           </li>
         </ul>
       </section>
@@ -32,10 +35,10 @@ export default function AboutPage() {
       <section className="card">
         <h2>Technology</h2>
         <ul className="content-list">
-          <li>Solidity 0.8.20 contract on Sepolia, deployed via Hardhat.</li>
+          <li>Solidity 0.8.24 contract on Sepolia, built on OpenZeppelin's ERC721 + ERC721Enumerable + IERC4906.</li>
           <li>React + Vite frontend with wallet-gated routing.</li>
           <li>Ethers.js v6 for read and write contract interactions through MetaMask.</li>
-          <li>Helia + UnixFS for fully in-browser IPFS uploads (no third-party keys).</li>
+          <li>Cloudflare Worker proxy to Pinata for persistent IPFS pinning (no per-user keys).</li>
         </ul>
       </section>
 

@@ -6,7 +6,9 @@ Web client for interacting with the `CaptchalogueArtifact` smart contract on Sep
 
 - Wallet-gated dashboard layout with sidebar navigation.
 - Drag-and-drop artwork upload with persistent IPFS pinning through a Cloudflare Worker + Pinata.
-- Mint, Explore, Verify, and Privacy pages mapped to every public contract function.
+- "My Artifacts" gallery with an in-place edit modal (metadata, hide/show, evidence submission) for tokens you own.
+- Verification anchored on-chain as evidence commitments (keccak256 of an evidence URL/CID) plus an event log carrying the URL itself.
+- Hide-from-default-view toggle (UI-level redaction; on-chain storage remains readable - this is not encryption).
 - Toast-style status messages and a Sepolia network indicator.
 - Hash routing for friction-free GitHub Pages hosting.
 
@@ -23,10 +25,12 @@ Web client for interacting with the `CaptchalogueArtifact` smart contract on Sep
 - `/` Connect Wallet (landing page; gates the rest of the app)
 - `/app` Dashboard (account snapshot, owned artifact count, quick links)
 - `/app/mint` Mint Artifact (drag-and-drop image upload + on-chain mint)
+- `/app/artifacts` My Artifacts (gallery of your tokens with inline edit modal)
+- `/app/artifacts/:tokenId` Artifact detail (full-page editor for a single token)
 - `/app/explore` Explore (look up any artifact by token ID)
-- `/app/verify` Verify (submit existence and possession attestations)
-- `/app/privacy` Privacy (toggle a token's public/private state)
 - `/app/about` About (project overview and contract link)
+
+Editing metadata, hiding from default view, and submitting verification evidence all live inside `My Artifacts` (modal) or the artifact detail page; there are no separate Verify or Privacy tabs.
 
 ## Prerequisites
 
@@ -99,6 +103,19 @@ Workflow file: `.github/workflows/frontend-gh-pages.yml`
 - End users do not need a Pinata key; they only need MetaMask + Sepolia ETH.
 - The minted token URI is `ipfs://<cid>` and remains valid for NFT metadata.
 - Keep `PINATA_JWT` only in Cloudflare Worker secrets, never in frontend code.
+
+## Verification model (hybrid)
+
+- The contract stores a single `bytes32` commitment + `uint64` timestamp per attestation type (existence, possession). It does not store a numeric score.
+- The frontend computes the commitment client-side as `keccak256(toUtf8Bytes(evidenceUrl))` and submits both the commitment and the original URL to the contract.
+- The URL is logged via `ExistenceEvidenceSubmitted` / `PossessionEvidenceSubmitted` events (cheap event-log storage), so off-chain UIs can recover it without paying for state slots.
+- Transferring an artifact resets both commitments. The new owner needs to re-attest.
+
+## Privacy model (soft / non-cryptographic)
+
+- The "Hide from default view" toggle (`togglePrivacy` on-chain) only affects the convenience read `getPublicArtifact`, which returns `"HIDDEN"` and `""` for the name and metadata URI when the flag is set.
+- Storage slots, the original `createArtifact` call data, and the standard `tokenURI(tokenId)` function still expose the full metadata URI to anyone who looks. The IPFS object referenced by that URI is also publicly fetchable.
+- This is not encryption. For sensitive documents (e.g. deeds/titles) you would need a separate model that encrypts the file before pinning and stores only ciphertext + a commitment on-chain.
 
 ## Security
 

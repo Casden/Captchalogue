@@ -27,11 +27,12 @@ export default function ExplorePage() {
         owner: result.owner,
         artifactName: result.artifactName,
         metadataURI: result.metadataURI,
-        isPrivate: result.isPrivate,
-        existenceScore: Number(result.existenceScore),
-        possessionScore: Number(result.possessionScore),
-        totalScore: Number(result.totalScore),
+        isPrivate: Boolean(result.isPrivate),
         createdAt: Number(result.createdAt),
+        existenceCommitment: result.existenceCommitment,
+        existenceAttestedAt: Number(result.existenceAttestedAt),
+        possessionCommitment: result.possessionCommitment,
+        possessionAttestedAt: Number(result.possessionAttestedAt),
       });
       setLoadedTokenId(tokenId);
     } catch (err) {
@@ -47,8 +48,8 @@ export default function ExplorePage() {
       <header className="page-header">
         <h1>Explore</h1>
         <p className="page-sub">
-          Look up any artifact by its token ID. Public artifacts show full details; private ones reveal only
-          their score summary.
+          Look up any artifact by its token ID. Public artifacts show full details; hidden ones reveal only their
+          evidence commitments.
         </p>
       </header>
 
