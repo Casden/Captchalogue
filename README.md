@@ -116,9 +116,3 @@ npm run deploy
 ```
 
 - Or use the workflow at `.github/workflows/frontend-gh-pages.yml` and set repository secret `VITE_CONTRACT_ADDRESS`.
-
-## Security Notes
-
-- Never commit `.env` files or private keys.
-- Use a dedicated test wallet for Sepolia deployments.
-- Assume any committed secret is compromised and rotate it immediately.
