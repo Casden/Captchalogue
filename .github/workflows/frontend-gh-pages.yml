@@ -44,6 +44,8 @@ jobs:
         run: npm run build
         env:
           VITE_CONTRACT_ADDRESS: ${{ secrets.VITE_CONTRACT_ADDRESS }}
+          # Public URL only; safe as repo variable or secret. Use whichever you configured in GitHub.
+          VITE_UPLOAD_API_URL: ${{ secrets.VITE_UPLOAD_API_URL || vars.VITE_UPLOAD_API_URL }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
