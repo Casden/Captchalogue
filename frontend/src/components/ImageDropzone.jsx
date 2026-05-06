@@ -1,28 +1,28 @@
 import { useEffect, useRef, useState } from "react";
-import { uploadFile } from "../lib/ipfs";
 
 const ACCEPTED = ["image/png", "image/jpeg", "image/gif", "image/webp", "image/svg+xml"];
 
-export default function ImageDropzone({ onUploaded, onError, disabled }) {
+/** Image is chosen locally; upload runs when the parent starts the mint ceremony. */
+export default function ImageDropzone({ onFileSelected, onError, disabled }) {
   const inputRef = useRef(null);
   const [preview, setPreview] = useState("");
   const [filename, setFilename] = useState("");
   const [status, setStatus] = useState("idle");
-  const [progressText, setProgressText] = useState("");
-  const [result, setResult] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  useEffect(() => () => {
-    if (preview) URL.revokeObjectURL(preview);
-  }, [preview]);
+  useEffect(
+    () => () => {
+      if (preview) URL.revokeObjectURL(preview);
+    },
+    [preview]
+  );
 
   function reportError(message) {
     setStatus("error");
-    setProgressText(message);
     if (onError) onError(message);
   }
 
-  async function handleFile(file) {
+  function applyFile(file) {
     if (!file) return;
     if (!ACCEPTED.includes(file.type)) {
       reportError("Unsupported file type. Use PNG, JPG, GIF, WEBP, or SVG.");
@@ -34,26 +34,16 @@ export default function ImageDropzone({ onUploaded, onError, disabled }) {
     }
 
     if (preview) URL.revokeObjectURL(preview);
-    setPreview(URL.createObjectURL(file));
+    const url = URL.createObjectURL(file);
+    setPreview(url);
     setFilename(file.name);
-    setResult(null);
-    setStatus("uploading");
-    setProgressText("Uploading and pinning to IPFS...");
-
-    try {
-      const uploaded = await uploadFile(file);
-      setResult(uploaded);
-      setStatus("uploaded");
-      setProgressText("Pinned successfully. This CID should remain available after you leave the tab.");
-      if (onUploaded) onUploaded(uploaded);
-    } catch (err) {
-      reportError(err?.message || "IPFS upload failed.");
-    }
+    setStatus("ready");
+    if (onFileSelected) onFileSelected(file);
   }
 
   function handleInputChange(e) {
     const file = e.target.files?.[0];
-    if (file) handleFile(file);
+    if (file) applyFile(file);
   }
 
   function handleDrop(e) {
@@ -61,7 +51,7 @@ export default function ImageDropzone({ onUploaded, onError, disabled }) {
     setIsDragging(false);
     if (disabled) return;
     const file = e.dataTransfer.files?.[0];
-    if (file) handleFile(file);
+    if (file) applyFile(file);
   }
 
   function handleDragOver(e) {
@@ -78,12 +68,17 @@ export default function ImageDropzone({ onUploaded, onError, disabled }) {
     if (preview) URL.revokeObjectURL(preview);
     setPreview("");
     setFilename("");
-    setResult(null);
     setStatus("idle");
-    setProgressText("");
     if (inputRef.current) inputRef.current.value = "";
-    if (onUploaded) onUploaded(null);
+    if (onFileSelected) onFileSelected(null);
   }
+
+  const statusLine =
+    status === "ready"
+      ? "Ready — your image will be pinned when you mint."
+      : status === "error"
+        ? "Fix the issue above or choose another file."
+        : "";
 
   return (
     <div className="dropzone-wrapper">
@@ -125,13 +120,11 @@ export default function ImageDropzone({ onUploaded, onError, disabled }) {
         <div className="dropzone-meta">
           <div>
             <strong>{filename}</strong>
-            <div className={`dropzone-status status-${status}`}>{progressText}</div>
-            {result && (
-              <div className="dropzone-cid">
-                <code>{result.uri}</code>
-                <a href={result.gatewayUrl} target="_blank" rel="noreferrer" className="link">
-                  View via gateway
-                </a>
+            {statusLine && (
+              <div
+                className={`dropzone-status ${status === "ready" ? "status-uploaded" : status === "error" ? "status-error" : ""}`}
+              >
+                {statusLine}
               </div>
             )}
           </div>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useWallet } from "../wallet/WalletContext";
 import { hasContractAddress } from "../lib/contract";
+import ThemeToggle from "../components/ThemeToggle";
 
 const NAV_ITEMS = [
   { to: "/app", label: "Dashboard", end: true },
@@ -79,6 +80,7 @@ export default function DashboardLayout() {
             ☰
           </button>
           <div className="topbar-right">
+            <ThemeToggle className="topbar-theme-toggle" />
             {!hasContractAddress() && (
               <span className="pill pill-warning">Contract address missing</span>
             )}

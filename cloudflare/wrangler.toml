@@ -4,4 +4,5 @@ compatibility_date = "2026-05-05"
 
 [vars]
 # Set in Cloudflare dashboard or via wrangler secret:
-ALLOWED_ORIGIN = "https://Casden.github.io"
+# Must be your GitHub Pages origin (scheme + host); host is matched case-insensitively to the browser's Origin header.
+ALLOWED_ORIGIN = "https://casden.github.io"

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useWallet } from "../wallet/WalletContext";
 import { useToast } from "../components/StatusBanner";
 import { hasContractAddress } from "../lib/contract";
+import ThemeToggle from "../components/ThemeToggle";
 
 export default function ConnectPage() {
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ export default function ConnectPage() {
 
   return (
     <div className="connect-page">
+      <ThemeToggle className="connect-theme-toggle" />
       <div className="connect-card">
         <div className="brand large">
           <span className="brand-mark">C</span>

@@ -1,8 +1,26 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useWallet } from "../wallet/WalletContext";
 import { useToast } from "../components/StatusBanner";
 import { explorerTxUrl, getWritableContract, hasContractAddress } from "../lib/contract";
+import { uploadFile } from "../lib/ipfs";
 import ImageDropzone from "../components/ImageDropzone";
+import MintCeremonyOverlay from "../components/MintCeremonyOverlay";
+
+function buildCeremonySteps(useManualUri) {
+  return [
+    {
+      id: "ipfs",
+      label: useManualUri ? "Resolve your metadata URI" : "Pin your artwork to IPFS",
+      status: "pending",
+    },
+    { id: "sign", label: "Sign the mint with your wallet", status: "pending" },
+    { id: "chain", label: "Anchor the artifact on Sepolia", status: "pending" },
+  ];
+}
+
+function markStep(steps, id, status) {
+  return steps.map((s) => (s.id === id ? { ...s, status } : s));
+}
 
 export default function MintPage() {
   const { isCorrectNetwork, isConnected, getSigner } = useWallet();
@@ -10,49 +28,137 @@ export default function MintPage() {
 
   const [artifactName, setArtifactName] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
-  const [uploadedUri, setUploadedUri] = useState("");
+  const [imageFile, setImageFile] = useState(null);
   const [manualOverride, setManualOverride] = useState(false);
   const [manualUri, setManualUri] = useState("");
-  const [isMinting, setIsMinting] = useState(false);
+  const [dropzoneKey, setDropzoneKey] = useState(0);
+
   const [lastMint, setLastMint] = useState(null);
 
-  const effectiveUri = manualOverride ? manualUri.trim() : uploadedUri;
+  const [ceremonyOpen, setCeremonyOpen] = useState(false);
+  const [ceremonyPhase, setCeremonyPhase] = useState(null);
+  const [ceremonySteps, setCeremonySteps] = useState([]);
+  const [ceremonyError, setCeremonyError] = useState(null);
+  const [ceremonySuccess, setCeremonySuccess] = useState(null);
+
+  const isMinting = ceremonyPhase === "minting";
+
+  const hasAsset = manualOverride ? manualUri.trim().length > 0 : Boolean(imageFile);
+
   const ready =
     isConnected &&
     isCorrectNetwork &&
     hasContractAddress() &&
     artifactName.trim().length > 0 &&
-    effectiveUri.length > 0 &&
+    hasAsset &&
     !isMinting;
+
+  const metadataPreview = useMemo(() => {
+    if (manualOverride) return manualUri.trim() || "(paste a URI)";
+    if (imageFile) return "(pinned when you mint)";
+    return "(choose an image)";
+  }, [manualOverride, manualUri, imageFile]);
+
+  function resetAfterSuccess() {
+    setArtifactName("");
+    setIsPrivate(false);
+    setManualUri("");
+    setImageFile(null);
+    setDropzoneKey((k) => k + 1);
+  }
+
+  function closeCeremony() {
+    setCeremonyOpen(false);
+    setCeremonyPhase(null);
+    setCeremonySteps([]);
+    setCeremonyError(null);
+    setCeremonySuccess(null);
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
     if (!ready) return;
-    setIsMinting(true);
+
+    const steps = buildCeremonySteps(manualOverride);
+    setCeremonySteps(steps);
+    setCeremonyError(null);
+    setCeremonySuccess(null);
+    setCeremonyPhase("minting");
+    setCeremonyOpen(true);
+
+    const setStep = (id, status) => {
+      setCeremonySteps((prev) => markStep(prev, id, status));
+    };
+
+    let ipfsMeta = null;
+
     try {
+      let tokenUri = "";
+
+      if (manualOverride) {
+        setStep("ipfs", "active");
+        tokenUri = manualUri.trim();
+        await new Promise((r) => setTimeout(r, 120));
+        setStep("ipfs", "complete");
+      } else {
+        setStep("ipfs", "active");
+        const uploaded = await uploadFile(imageFile);
+        tokenUri = uploaded.uri;
+        ipfsMeta = { cid: uploaded.cid, gatewayUrl: uploaded.gatewayUrl };
+        setStep("ipfs", "complete");
+      }
+
+      setStep("sign", "active");
       const contract = await getWritableContract(getSigner);
-      const tx = await contract.createArtifact(artifactName.trim(), effectiveUri, isPrivate);
-      toast.info(`Mint transaction sent: ${tx.hash.slice(0, 10)}...`);
+      const tx = await contract.createArtifact(artifactName.trim(), tokenUri, isPrivate);
+      toast.info(`Mint transaction sent: ${tx.hash.slice(0, 10)}…`);
+      setStep("sign", "complete");
+
+      setStep("chain", "active");
       const receipt = await tx.wait();
+      setStep("chain", "complete");
+
       setLastMint({ hash: tx.hash, blockNumber: receipt?.blockNumber });
       toast.success("Artifact minted successfully.");
-      setArtifactName("");
-      setIsPrivate(false);
-      setUploadedUri("");
-      setManualUri("");
+
+      setCeremonySuccess({
+        artifactName: artifactName.trim(),
+        cid: ipfsMeta?.cid,
+        gatewayUrl: ipfsMeta?.gatewayUrl,
+        txHash: tx.hash,
+        blockNumber: receipt?.blockNumber,
+        txUrl: explorerTxUrl(tx.hash),
+      });
+      setCeremonyPhase("success");
+      resetAfterSuccess();
     } catch (err) {
-      toast.error(err?.shortMessage || err?.message || "Mint failed.");
-    } finally {
-      setIsMinting(false);
+      const msg = err?.shortMessage || err?.message || "Mint failed.";
+      setCeremonyError(msg);
+      setCeremonyPhase("error");
+      setCeremonySteps((prev) =>
+        prev.map((s) => (s.status === "active" ? { ...s, status: "error" } : s))
+      );
+      toast.error(msg);
     }
   }
 
   return (
     <div className="page">
+      <MintCeremonyOverlay
+        open={ceremonyOpen}
+        phase={ceremonyPhase}
+        artifactName={artifactName}
+        steps={ceremonySteps}
+        errorMessage={ceremonyError}
+        successMeta={ceremonySuccess}
+        onClose={closeCeremony}
+      />
+
       <header className="page-header">
         <h1>Mint Artifact</h1>
         <p className="page-sub">
-          Create a new on-chain artifact NFT. Drop an image to upload it through the in-browser IPFS node.
+          Choose an image and name your piece — when you mint, it is pinned to IPFS and inscribed on Sepolia in one
+          ceremony.
         </p>
       </header>
 
@@ -60,16 +166,21 @@ export default function MintPage() {
         <section className="card">
           <h2>Artifact Image</h2>
           <ImageDropzone
-            onUploaded={(uploaded) => setUploadedUri(uploaded?.uri || "")}
+            key={dropzoneKey}
+            onFileSelected={(file) => setImageFile(file)}
             onError={(message) => toast.error(message)}
-            disabled={isMinting}
+            disabled={isMinting || manualOverride}
           />
           <div className="advanced-toggle">
             <label className="checkbox">
               <input
                 type="checkbox"
                 checked={manualOverride}
-                onChange={(e) => setManualOverride(e.target.checked)}
+                onChange={(e) => {
+                  setManualOverride(e.target.checked);
+                  if (e.target.checked) setImageFile(null);
+                }}
+                disabled={isMinting}
               />
               Advanced: paste URI manually
             </label>
@@ -79,12 +190,12 @@ export default function MintPage() {
                 placeholder="ipfs://... or https://..."
                 value={manualUri}
                 onChange={(e) => setManualUri(e.target.value)}
+                disabled={isMinting}
               />
             )}
           </div>
           <p className="hint">
-            Images are uploaded through your configured Cloudflare endpoint and pinned to IPFS, so metadata
-            remains available after leaving the tab.
+            Uploads use your Cloudflare worker and Pinata so the image stays retrievable after you close the tab.
           </p>
         </section>
 
@@ -100,6 +211,7 @@ export default function MintPage() {
                 maxLength={120}
                 required
                 placeholder="e.g. Vintage Camera #001"
+                disabled={isMinting}
               />
             </label>
 
@@ -108,17 +220,18 @@ export default function MintPage() {
                 type="checkbox"
                 checked={isPrivate}
                 onChange={(e) => setIsPrivate(e.target.checked)}
+                disabled={isMinting}
               />
               Mark as private (hides name and URI from public reads)
             </label>
 
             <div className="readonly-field">
-              <span className="readonly-label">Metadata URI</span>
-              <code className="readonly-value">{effectiveUri || "(awaiting upload)"}</code>
+              <span className="readonly-label">Token URI</span>
+              <code className="readonly-value">{metadataPreview}</code>
             </div>
 
             <button type="submit" className="btn btn-primary" disabled={!ready}>
-              {isMinting ? "Minting..." : "Mint Artifact"}
+              {isMinting ? "Minting…" : "Mint Artifact"}
             </button>
           </form>
 
