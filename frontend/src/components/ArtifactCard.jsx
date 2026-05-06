@@ -47,15 +47,17 @@ export default function ArtifactCard({ tokenId, data }) {
   const gateway = ipfsUriToGateway(data.metadataURI);
 
   return (
-    <div className="artifact-card">
-      <div className="artifact-image">
-        {data.isPrivate ? (
-          <div className="artifact-private">Hidden in default view</div>
-        ) : gateway ? (
-          <img src={gateway} alt={data.artifactName || `Token ${tokenId}`} />
-        ) : (
-          <div className="artifact-empty">No image</div>
-        )}
+    <div className="artifact-card artifact-card-themed">
+      <div className="artifact-image artifact-image-cardface">
+        <div className="artifact-cardframe">
+          {data.isPrivate ? (
+            <div className="artifact-private">Hidden in default view</div>
+          ) : gateway ? (
+            <img src={gateway} alt={data.artifactName || `Token ${tokenId}`} />
+          ) : (
+            <div className="artifact-empty">No image</div>
+          )}
+        </div>
       </div>
 
       <div className="artifact-body">

@@ -46,7 +46,7 @@ export default function ExplorePage() {
   return (
     <div className="page">
       <header className="page-header">
-        <h1>Explore</h1>
+        <h1>Explore Artifacts</h1>
         <p className="page-sub">
           Look up any artifact by its token ID. Public artifacts show full details; hidden ones reveal only their
           evidence commitments.

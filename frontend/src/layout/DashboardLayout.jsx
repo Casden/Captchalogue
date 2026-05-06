@@ -20,6 +20,7 @@ function shorten(addr) {
 export default function DashboardLayout() {
   const { account, isCorrectNetwork, switchToSepolia, disconnect } = useWallet();
   const [navOpen, setNavOpen] = useState(false);
+  const brandLogoUrl = `${import.meta.env.BASE_URL}assets/homestuck/logo/SBurb_Logo.svg`;
 
   useEffect(() => {
     setNavOpen(false);
@@ -30,7 +31,7 @@ export default function DashboardLayout() {
       <aside className={`sidebar ${navOpen ? "sidebar-open" : ""}`}>
         <div className="sidebar-header">
           <div className="brand">
-            <span className="brand-mark">C</span>
+            <img className="brand-mark brand-mark-image" src={brandLogoUrl} alt="" aria-hidden="true" />
             <span className="brand-name">Captchalogue</span>
           </div>
           <button

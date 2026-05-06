@@ -20,13 +20,19 @@ export async function uploadFile(file) {
 
 
 
-  const response = await fetch(UPLOAD_API_URL, {
-
-    method: "POST",
-
-    body: formData,
-
-  });
+  let response;
+  try {
+    response = await fetch(UPLOAD_API_URL, {
+      method: "POST",
+      body: formData,
+    });
+  } catch (err) {
+    const raw = err?.message || "Network request failed";
+    throw new Error(
+      `Upload request could not reach ${UPLOAD_API_URL}. ${raw}. ` +
+        "Check that VITE_UPLOAD_API_URL is an https Cloudflare Worker /upload endpoint with CORS enabled for this site."
+    );
+  }
 
 
 
@@ -34,7 +40,9 @@ export async function uploadFile(file) {
 
     const message = await response.text();
 
-    throw new Error(`Upload failed (${response.status}): ${message}`);
+    throw new Error(
+      `Upload failed (${response.status}) at ${UPLOAD_API_URL}: ${message}`
+    );
 
   }
 
@@ -67,18 +75,15 @@ export async function uploadFile(file) {
 
 
 export function ipfsUriToGateway(uri) {
-
   if (!uri) return "";
+  const trimmed = String(uri).trim();
+  if (!trimmed) return "";
 
-  if (uri.startsWith("ipfs://")) {
-
-    const cid = uri.slice("ipfs://".length).replace(/^\/+/, "");
-
+  if (trimmed.startsWith("ipfs://")) {
+    const cid = trimmed.slice("ipfs://".length).replace(/^\/+/, "");
     return `https://ipfs.io/ipfs/${cid}`;
-
   }
 
-  return uri;
-
+  return trimmed;
 }
 

@@ -16,6 +16,7 @@ export default function ConnectPage() {
     switchToSepolia,
     error,
   } = useWallet();
+  const brandLogoUrl = `${import.meta.env.BASE_URL}assets/homestuck/logo/SBurb_Logo.svg`;
 
   useEffect(() => {
     if (isConnected) {
@@ -32,7 +33,7 @@ export default function ConnectPage() {
       <ThemeToggle className="connect-theme-toggle" />
       <div className="connect-card">
         <div className="brand large">
-          <span className="brand-mark">C</span>
+          <img className="brand-mark brand-mark-image" src={brandLogoUrl} alt="" aria-hidden="true" />
           <span className="brand-name">Captchalogue</span>
         </div>
 
@@ -74,7 +75,7 @@ export default function ConnectPage() {
 
         <ul className="feature-list">
           <li>Drag-and-drop artwork uploads with in-browser IPFS</li>
-          <li>Two-part verification scoring (existence + possession)</li>
+          <li>Two-part verification evidence (existence + possession)</li>
           <li>Public and private artifacts with owner-only details</li>
         </ul>
       </div>

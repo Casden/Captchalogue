@@ -5,6 +5,7 @@ import { useWallet } from "../wallet/WalletContext";
 import { useToast } from "../components/StatusBanner";
 import { explorerTxUrl, getReadonlyContract, getWritableContract, hasContractAddress } from "../lib/contract";
 import { ipfsUriToGateway } from "../lib/ipfs";
+import CaptchalogueCard from "../components/CaptchalogueCard";
 
 const ZERO_HASH = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
@@ -17,41 +18,13 @@ function formatTimestamp(unixSeconds) {
 
 function shortenHash(hash) {
   if (!hash || hash === ZERO_HASH) return "";
-  return `${hash.slice(0, 10)}?${hash.slice(-6)}`;
+  return `${hash.slice(0, 10)}...${hash.slice(-6)}`;
 }
 
 function evidenceCommitment(uri) {
   const trimmed = (uri || "").trim();
   if (!trimmed) return ZERO_HASH;
   return ethers.keccak256(ethers.toUtf8Bytes(trimmed));
-}
-
-function ArtifactTile({ tokenId, artifact, onClick }) {
-  const gateway = ipfsUriToGateway(artifact.metadataURI);
-  const badgeClass = artifact.isPrivate ? "pill pill-warning" : "pill pill-success";
-  const badgeText = artifact.isPrivate ? "Hidden" : "Public";
-  const title = artifact.isPrivate ? "Hidden" : artifact.artifactName || "(untitled)";
-  const verifiedCount = (artifact.existenceAttestedAt ? 1 : 0) + (artifact.possessionAttestedAt ? 1 : 0);
-
-  return (
-    <button type="button" className="artifact-tile" onClick={onClick}>
-      <div className="artifact-tile-thumb">
-        {gateway ? <img src={gateway} alt={title} /> : <div className="artifact-tile-empty">No image</div>}
-      </div>
-      <div className="artifact-tile-body">
-        <div className="artifact-tile-row">
-          <strong className="artifact-tile-title">{title}</strong>
-          <span className={badgeClass}>{badgeText}</span>
-        </div>
-        <div className="artifact-tile-sub">
-          <span>Token #{String(tokenId)}</span>
-          <span>
-            {verifiedCount}/2 evidence on file
-          </span>
-        </div>
-      </div>
-    </button>
-  );
 }
 
 function EvidenceRow({ label, commitment, attestedAt }) {
@@ -382,7 +355,7 @@ export default function MyArtifactsPage() {
       />
 
       <header className="page-header">
-        <h1>My Artifacts</h1>
+        <h1>Your Artifacts</h1>
         <p className="page-sub">A gallery of every artifact tied to your wallet. Click one to edit in place.</p>
       </header>
 
@@ -395,19 +368,11 @@ export default function MyArtifactsPage() {
       <section className="card">
         <div className="my-artifacts-header-row">
           <div className="my-artifacts-count">
-            <strong>{loading ? "Loading?" : `${tokenIds.length}`}</strong> artifacts
+            <strong>{loading ? "Loading..." : `${tokenIds.length}`}</strong> artifacts
           </div>
           <div className="row">
             <button type="button" className="btn btn-secondary" onClick={() => navigate("/app/mint")}>
               Mint a new artifact
-            </button>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => selectedTokenId && navigate(`/app/artifacts/${selectedTokenId}`)}
-              disabled={selectedTokenId == null}
-            >
-              Open full detail page
             </button>
           </div>
         </div>
@@ -417,7 +382,12 @@ export default function MyArtifactsPage() {
         ) : (
           <div className="artifact-gallery">
             {ordered.map(({ tokenId, artifact }) => (
-              <ArtifactTile key={tokenId} tokenId={tokenId} artifact={artifact} onClick={() => setSelectedTokenId(tokenId)} />
+              <CaptchalogueCard
+                key={tokenId}
+                tokenId={tokenId}
+                artifact={artifact}
+                onClick={() => setSelectedTokenId(tokenId)}
+              />
             ))}
           </div>
         )}

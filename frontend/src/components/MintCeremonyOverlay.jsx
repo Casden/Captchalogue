@@ -22,6 +22,8 @@ export default function MintCeremonyOverlay({
 
   const isError = phase === "error";
   const isSuccess = phase === "success";
+  const isMinting = phase === "minting";
+  const loadingAnimationUrl = `${import.meta.env.BASE_URL}assets/homestuck/animations/sburb_loading_animation.gif`;
 
   return (
     <div className="mint-ceremony-root" role="dialog" aria-modal="true" aria-labelledby="mint-ceremony-title">
@@ -30,10 +32,11 @@ export default function MintCeremonyOverlay({
         <div className="mint-ceremony-glow" aria-hidden />
 
         <header className="mint-ceremony-header">
-          <p className="mint-ceremony-kicker">Captchalogue</p>
+          <p className="mint-ceremony-kicker">Punch Designix</p>
           <h2 id="mint-ceremony-title">
-            {isSuccess ? "Artifact inscribed" : isError ? "Mint interrupted" : "Forging your artifact"}
+            {isSuccess ? "Mint complete" : isError ? "Mint interrupted" : "Minting artifact"}
           </h2>
+          {isSuccess && <p className="mint-ceremony-flavor">Card sylladexed, blockchain edition.</p>}
           {(successMeta?.artifactName || artifactName) && (
             <p className="mint-ceremony-sub">
               {isSuccess ? (
@@ -44,12 +47,18 @@ export default function MintCeremonyOverlay({
                 "Something went wrong before the inscription was completed."
               ) : (
                 <>
-                  Sealing <strong>{artifactName}</strong> into Sepolia — this only happens once.
+                  Sealing <strong>{artifactName}</strong> into Sepolia.
                 </>
               )}
             </p>
           )}
         </header>
+
+        {isMinting && (
+          <div className="mint-ceremony-animation-wrap">
+            <img src={loadingAnimationUrl} alt="" aria-hidden="true" className="mint-ceremony-animation" />
+          </div>
+        )}
 
         <ol className="mint-ceremony-steps">
           {steps.map((step, i) => (

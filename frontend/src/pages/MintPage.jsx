@@ -3,19 +3,23 @@ import { useWallet } from "../wallet/WalletContext";
 import { useToast } from "../components/StatusBanner";
 import { explorerTxUrl, getWritableContract, hasContractAddress } from "../lib/contract";
 import { uploadFile } from "../lib/ipfs";
+import { removeImageBackground } from "../lib/bgRemoval";
 import ImageDropzone from "../components/ImageDropzone";
 import MintCeremonyOverlay from "../components/MintCeremonyOverlay";
 
-function buildCeremonySteps(useManualUri) {
-  return [
-    {
-      id: "ipfs",
-      label: useManualUri ? "Resolve your metadata URI" : "Pin your artwork to IPFS",
-      status: "pending",
-    },
-    { id: "sign", label: "Sign the mint with your wallet", status: "pending" },
-    { id: "chain", label: "Anchor the artifact on Sepolia", status: "pending" },
-  ];
+function buildCeremonySteps(useManualUri, shouldRemoveBg) {
+  const steps = [];
+  if (!useManualUri && shouldRemoveBg) {
+    steps.push({ id: "bg", label: "Removing image background", status: "pending" });
+  }
+  steps.push({
+    id: "ipfs",
+    label: useManualUri ? "Resolve your metadata URI" : "Pin your artwork to IPFS",
+    status: "pending",
+  });
+  steps.push({ id: "sign", label: "Sign the mint with your wallet", status: "pending" });
+  steps.push({ id: "chain", label: "Anchor the artifact on Sepolia", status: "pending" });
+  return steps;
 }
 
 function markStep(steps, id, status) {
@@ -30,6 +34,7 @@ export default function MintPage() {
   const [isPrivate, setIsPrivate] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [manualOverride, setManualOverride] = useState(false);
+  const [removeBg, setRemoveBg] = useState(true);
   const [manualUri, setManualUri] = useState("");
   const [dropzoneKey, setDropzoneKey] = useState(0);
 
@@ -79,7 +84,7 @@ export default function MintPage() {
     e.preventDefault();
     if (!ready) return;
 
-    const steps = buildCeremonySteps(manualOverride);
+    const steps = buildCeremonySteps(manualOverride, removeBg);
     setCeremonySteps(steps);
     setCeremonyError(null);
     setCeremonySuccess(null);
@@ -101,8 +106,21 @@ export default function MintPage() {
         await new Promise((r) => setTimeout(r, 120));
         setStep("ipfs", "complete");
       } else {
+        let uploadTarget = imageFile;
+        if (removeBg) {
+          setStep("bg", "active");
+          try {
+            uploadTarget = await removeImageBackground(imageFile);
+            setStep("bg", "complete");
+          } catch (bgErr) {
+            throw new Error(
+              bgErr?.message ||
+                "Background removal failed. Try again, or disable background removal and mint with the original image."
+            );
+          }
+        }
         setStep("ipfs", "active");
-        const uploaded = await uploadFile(imageFile);
+        const uploaded = await uploadFile(uploadTarget);
         tokenUri = uploaded.uri;
         ipfsMeta = { cid: uploaded.cid, gatewayUrl: uploaded.gatewayUrl };
         setStep("ipfs", "complete");
@@ -192,6 +210,17 @@ export default function MintPage() {
                 onChange={(e) => setManualUri(e.target.value)}
                 disabled={isMinting}
               />
+            )}
+            {!manualOverride && (
+              <label className="checkbox">
+                <input
+                  type="checkbox"
+                  checked={removeBg}
+                  onChange={(e) => setRemoveBg(e.target.checked)}
+                  disabled={isMinting}
+                />
+                Remove image background automatically (first use downloads a model)
+              </label>
             )}
           </div>
           <p className="hint">
