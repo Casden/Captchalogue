@@ -56,7 +56,11 @@ export default function MintCeremonyOverlay({
 
         {isMinting && (
           <div className="mint-ceremony-animation-wrap">
-            <img src={loadingAnimationUrl} alt="" aria-hidden="true" className="mint-ceremony-animation" />
+            <div
+              className="mint-ceremony-animation mint-ceremony-animation-gif"
+              aria-hidden="true"
+              style={{ "--mint-loader-gif": `url("${loadingAnimationUrl}")` }}
+            />
           </div>
         )}
 

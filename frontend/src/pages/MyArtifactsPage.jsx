@@ -4,7 +4,8 @@ import { ethers } from "ethers";
 import { useWallet } from "../wallet/WalletContext";
 import { useToast } from "../components/StatusBanner";
 import { explorerTxUrl, getReadonlyContract, getWritableContract, hasContractAddress } from "../lib/contract";
-import { ipfsUriToGateway } from "../lib/ipfs";
+import { ipfsUriToGateway, uploadFile } from "../lib/ipfs";
+import { removeImageBackground } from "../lib/bgRemoval";
 import CaptchalogueCard from "../components/CaptchalogueCard";
 
 const ZERO_HASH = "0x0000000000000000000000000000000000000000000000000000000000000000";
@@ -55,8 +56,10 @@ function ArtifactEditModal({
   busy,
   onClose,
   onSaveMetadata,
+  onRemoveBackground,
   onTogglePrivacy,
   onSubmitEvidence,
+  onTransfer,
 }) {
   const [artifactName, setArtifactName] = useState("");
   const [metadataURI, setMetadataURI] = useState("");
@@ -130,10 +133,26 @@ function ArtifactEditModal({
                 <button
                   type="button"
                   className="btn btn-secondary"
+                  onClick={() => onRemoveBackground(tokenId, artifactName.trim(), metadataURI.trim())}
+                  disabled={busy || !metadataURI.trim()}
+                >
+                  Remove image background
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
                   onClick={() => onTogglePrivacy(tokenId, !artifact.isPrivate)}
                   disabled={busy}
                 >
                   {artifact.isPrivate ? "Show in default view" : "Hide from default view"}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => onTransfer(tokenId)}
+                  disabled={busy}
+                >
+                  Transfer this artifact
                 </button>
               </div>
               <p className="hint">
@@ -323,6 +342,51 @@ export default function MyArtifactsPage() {
     });
   }
 
+  async function handleRemoveBackground(tokenId, artifactName, metadataUri) {
+    if (!metadataUri) {
+      toast.error("No metadata URI is set for this artifact.");
+      return;
+    }
+
+    setBusy(true);
+    try {
+      const sourceUrl = ipfsUriToGateway(metadataUri);
+      toast.info("Fetching current image...");
+      const response = await fetch(sourceUrl);
+      if (!response.ok) {
+        throw new Error(`Could not fetch current image (${response.status}).`);
+      }
+
+      const type = (response.headers.get("content-type") || "").toLowerCase();
+      if (type && !type.startsWith("image/")) {
+        throw new Error(
+          "Current metadata URI does not point directly to an image. Set it to an image URL/IPFS URI first, then retry."
+        );
+      }
+
+      const blob = await response.blob();
+      const inputFile = new File([blob], `artifact-${tokenId}.png`, { type: blob.type || "image/png" });
+
+      toast.info("Removing background...");
+      const processedFile = await removeImageBackground(inputFile);
+
+      toast.info("Uploading processed image...");
+      const uploaded = await uploadFile(processedFile);
+
+      const c = await getWritableContract(getSigner);
+      const tx = await c.updateArtifactMetadata(tokenId, artifactName || "(untitled)", uploaded.uri);
+      toast.info(`Transaction sent: ${tx.hash.slice(0, 10)}...`);
+      await tx.wait();
+      toast.success("Background removed and metadata updated.");
+
+      await refreshArtifacts();
+    } catch (err) {
+      toast.error(err?.shortMessage || err?.message || "Background removal failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function handleSubmitEvidence(tokenId, kind, evidenceUri) {
     if (!evidenceUri) {
       toast.error("Provide an evidence URL or CID.");
@@ -350,8 +414,13 @@ export default function MyArtifactsPage() {
         busy={busy}
         onClose={() => setSelectedTokenId(null)}
         onSaveMetadata={handleSaveMetadata}
+        onRemoveBackground={handleRemoveBackground}
         onTogglePrivacy={handleTogglePrivacy}
         onSubmitEvidence={handleSubmitEvidence}
+        onTransfer={(id) => {
+          setSelectedTokenId(null);
+          navigate(`/app/transfer?tokenId=${id}`);
+        }}
       />
 
       <header className="page-header">

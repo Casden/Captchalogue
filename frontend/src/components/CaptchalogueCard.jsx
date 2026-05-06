@@ -23,12 +23,13 @@ function HashRow({ label, value }) {
   );
 }
 
-export default function CaptchalogueCard({ tokenId, artifact, onClick }) {
+export default function CaptchalogueCard({ tokenId, artifact, onClick, interactive = true }) {
   const imageSrc = ipfsUriToGateway(artifact.metadataURI);
   const title = artifact.isPrivate ? "Hidden in default view" : artifact.artifactName || "(untitled)";
+  const cardClass = `captcha-card ${interactive ? "" : "captcha-card-static"}`.trim();
 
   return (
-    <button type="button" className="captcha-card" onClick={onClick}>
+    <button type="button" className={cardClass} onClick={interactive ? onClick : undefined}>
       <span className="sr-only">Flip card to see blockchain details</span>
       <span className="captcha-card-inner">
         <span className="captcha-card-face captcha-card-front">

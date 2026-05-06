@@ -90,6 +90,10 @@ export default function DashboardPage() {
             <strong>My Artifacts</strong>
             <span>Browse, edit, hide, and submit evidence for tokens you own.</span>
           </Link>
+          <Link to="/app/transfer" className="quick-action">
+            <strong>Transfer</strong>
+            <span>Send an artifact you own to another wallet.</span>
+          </Link>
           <Link to="/app/explore" className="quick-action">
             <strong>Explore</strong>
             <span>Look up any artifact by token ID.</span>

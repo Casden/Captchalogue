@@ -8,6 +8,7 @@ import MyArtifactsPage from "./pages/MyArtifactsPage";
 import ExplorePage from "./pages/ExplorePage";
 import AboutPage from "./pages/AboutPage";
 import ArtifactDetailPage from "./pages/ArtifactDetailPage";
+import TransferPage from "./pages/TransferPage";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="mint" element={<MintPage />} />
         <Route path="artifacts" element={<MyArtifactsPage />} />
         <Route path="artifacts/:tokenId" element={<ArtifactDetailPage />} />
+        <Route path="transfer" element={<TransferPage />} />
         <Route path="explore" element={<ExplorePage />} />
         <Route path="about" element={<AboutPage />} />
       </Route>

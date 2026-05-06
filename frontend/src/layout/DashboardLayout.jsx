@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { to: "/app", label: "Dashboard", end: true },
   { to: "/app/mint", label: "Mint" },
   { to: "/app/artifacts", label: "My Artifacts" },
+  { to: "/app/transfer", label: "Transfer" },
   { to: "/app/explore", label: "Explore" },
   { to: "/app/about", label: "About" },
 ];

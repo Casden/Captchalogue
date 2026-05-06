@@ -8,7 +8,7 @@ import ImageDropzone from "../components/ImageDropzone";
 import MintCeremonyOverlay from "../components/MintCeremonyOverlay";
 
 function buildCeremonySteps(useManualUri, shouldRemoveBg) {
-  const steps = [];
+  const steps = [{ id: "warmup", label: "Warming up...", status: "pending" }];
   if (!useManualUri && shouldRemoveBg) {
     steps.push({ id: "bg", label: "Removing image background", status: "pending" });
   }
@@ -24,6 +24,14 @@ function buildCeremonySteps(useManualUri, shouldRemoveBg) {
 
 function markStep(steps, id, status) {
   return steps.map((s) => (s.id === id ? { ...s, status } : s));
+}
+
+function nextPaint() {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(resolve);
+    });
+  });
 }
 
 export default function MintPage() {
@@ -85,7 +93,9 @@ export default function MintPage() {
     if (!ready) return;
 
     const steps = buildCeremonySteps(manualOverride, removeBg);
-    setCeremonySteps(steps);
+    const firstStepId = steps[0]?.id;
+    const preparedSteps = firstStepId ? markStep(steps, firstStepId, "active") : steps;
+    setCeremonySteps(preparedSteps);
     setCeremonyError(null);
     setCeremonySuccess(null);
     setCeremonyPhase("minting");
@@ -98,20 +108,25 @@ export default function MintPage() {
     let ipfsMeta = null;
 
     try {
+      // Let the overlay, GIF, and spinner render before heavy async work starts.
+      await nextPaint();
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      setStep("warmup", "complete");
+      if (steps[1]?.id) setStep(steps[1].id, "active");
+
       let tokenUri = "";
 
       if (manualOverride) {
-        setStep("ipfs", "active");
         tokenUri = manualUri.trim();
         await new Promise((r) => setTimeout(r, 120));
         setStep("ipfs", "complete");
       } else {
         let uploadTarget = imageFile;
         if (removeBg) {
-          setStep("bg", "active");
           try {
             uploadTarget = await removeImageBackground(imageFile);
             setStep("bg", "complete");
+            setStep("ipfs", "active");
           } catch (bgErr) {
             throw new Error(
               bgErr?.message ||
@@ -119,7 +134,6 @@ export default function MintPage() {
             );
           }
         }
-        setStep("ipfs", "active");
         const uploaded = await uploadFile(uploadTarget);
         tokenUri = uploaded.uri;
         ipfsMeta = { cid: uploaded.cid, gatewayUrl: uploaded.gatewayUrl };
@@ -223,9 +237,6 @@ export default function MintPage() {
               </label>
             )}
           </div>
-          <p className="hint">
-            Uploads use your Cloudflare worker and Pinata so the image stays retrievable after you close the tab.
-          </p>
         </section>
 
         <section className="card">

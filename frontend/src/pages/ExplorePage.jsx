@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useWallet } from "../wallet/WalletContext";
 import { useToast } from "../components/StatusBanner";
 import { getReadonlyContract, hasContractAddress } from "../lib/contract";
-import ArtifactCard from "../components/ArtifactCard";
+import CaptchalogueCard from "../components/CaptchalogueCard";
 
 export default function ExplorePage() {
   const { provider } = useWallet();
@@ -71,7 +71,11 @@ export default function ExplorePage() {
         </form>
       </section>
 
-      {data && <ArtifactCard tokenId={loadedTokenId} data={data} />}
+      {data && (
+        <section className="explore-card-center">
+          <CaptchalogueCard tokenId={loadedTokenId} artifact={data} interactive={false} />
+        </section>
+      )}
     </div>
   );
 }
